@@ -43,7 +43,7 @@ class RenderedObject {
 		std::vector<RenderedObject*> m_Children;
 		std::vector<Animation*> m_AnimChilds;
 
-		void CreerBuffer(const char* imgName);// TODO remove ONLY KEEP isVisible = true;
+		//void CreerBuffer(const char* imgName);// TODO remove ONLY KEEP isVisible = true;
 
 	public:
 		inline RenderedObject() : m_Transform(glm::mat4(1.0f)), m_Visible(false) {};
@@ -65,8 +65,8 @@ class RenderedObject {
 		void Rotate(float angle, glm::vec3 position);
 		void SetParent(RenderedObject& obj);
 		void ChangeGeometry(Geometry* geometry); // TODO remove ???
-		void AfficherRecursif(std::stack<glm::mat4>& matrices, float currentTime, Camera camera, Light sun);
-		void Afficher(std::stack<glm::mat4>& matrices, Camera camera, Light sun);
+		void AfficherRecursif(std::stack<glm::mat4>& matrices, float currentTime, Camera camera, Light sun, Texture* caustic = nullptr);
+		void Afficher(std::stack<glm::mat4>& matrices, Camera camera, Light sun, Texture* caustic = nullptr);
 
 };
 

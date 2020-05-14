@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/*
+Classe gérant l'héritage de chacun des objet et leur affichage
+*/
+
 #include "rendering/RenderedObject.h"
 
 #include <algorithm>
@@ -77,7 +81,7 @@ void RenderedObject::ChangeGeometry(Geometry* geometry) {
 	m_Geometry = geometry;
 }
 
-void RenderedObject::AfficherRecursif(std::stack<glm::mat4>& matrices, float currentTime, Camera camera, Light sun) {
+void RenderedObject::AfficherRecursif(std::stack<glm::mat4>& matrices, float currentTime, Camera camera, Light sun, Texture* caustic) {
 	// TODO refactoring needed
 	UpdateAnimations(currentTime);
 	if(matrices.size() == 0)
@@ -86,15 +90,15 @@ void RenderedObject::AfficherRecursif(std::stack<glm::mat4>& matrices, float cur
 		matrices.push(matrices.top() * m_Transform);
 
 	if(m_Visible)
-		Afficher(matrices, camera, sun);
+		Afficher(matrices, camera, sun, caustic);
 
 	for(RenderedObject* tempObj : m_Children)
-		tempObj->AfficherRecursif(matrices, currentTime, camera, sun);
+		tempObj->AfficherRecursif(matrices, currentTime, camera, sun, caustic);
 
 	matrices.pop();
 }
 
-void RenderedObject::Afficher(std::stack<glm::mat4>& matrices, Camera camera, Light sun) {
+void RenderedObject::Afficher(std::stack<glm::mat4>& matrices, Camera camera, Light sun, Texture* caustic) {
 
 	glm::mat4 modelView = camera.getViewM() * matrices.top();
 
@@ -110,7 +114,11 @@ void RenderedObject::Afficher(std::stack<glm::mat4>& matrices, Camera camera, Li
 	m_Shader->SetUniformMat4f("u_Model", matrices.top());
 	m_Shader->SetUniformMat4f("u_View", camera.getViewM());
 
-	m_Shader->SetUniform1i("u_Texture", 0); // TEXTURE_SLOT
+	m_Shader->SetUniform1i("u_Texture", 0); // 0 = TEXTURE_SLOT
+	if(caustic != nullptr) {
+		caustic->Bind(1); // 1 = TEXTURE_SLOT
+		m_Shader->SetUniform1i("u_Caustic", 1);
+	}
 	m_Shader->SetUniformVec4f("u_Color", m_Material->getColor());
 	m_Shader->SetUniformVec4f("u_K", m_Material->getComponents());
 	m_Shader->SetUniformVec3f("u_LightColor", sun.m_Color);
